@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#050813" />
+    <title>Gift Dash — TikTok LIVE Race</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@500;600;700&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <header class="topbar">
+        <div class="brand">
+          <div class="brand-mark">⚡</div>
+          <div>
+            <span class="eyebrow">TikTok LIVE interactive</span>
+            <h1>Gift Dash</h1>
+          </div>
+        </div>
+        <div class="status-wrap">
+          <span class="status-dot" id="statusDot"></span>
+          <span id="statusText">Demo mode</span>
+        </div>
+        <button class="icon-button" id="settingsButton" aria-label="Open settings">⚙</button>
+      </header>
+
+      <section class="leader-strip" id="leaderStrip" aria-label="Top racers"></section>
+
+      <section class="race-card">
+        <div class="race-heading">
+          <div>
+            <span class="live-pill"><i></i> LIVE RACE</span>
+            <h2>First to the portal wins</h2>
+          </div>
+          <div class="winner-burst" id="winnerBurst"></div>
+          <div class="round-info"><span>ROUND</span><strong id="roundNumber">01</strong></div>
+        </div>
+        <div class="track" id="track">
+          <div class="track-grid"></div>
+          <div class="start-line"><span>START</span></div>
+          <div class="finish-line"><span>FINISH</span></div>
+          <div class="lanes" id="lanes"></div>
+        </div>
+      </section>
+
+      <footer class="gift-dock">
+        <div class="dock-title">
+          <span>GIFT BOOSTS</span>
+          <small>Send a gift to move its racer</small>
+        </div>
+        <div class="gift-list" id="giftList"></div>
+        <button class="reset-button" id="resetButton">↻ Reset race</button>
+      </footer>
+    </main>
+
+    <aside class="drawer" id="drawer" aria-hidden="true">
+      <div class="drawer-head">
+        <div><span class="eyebrow">Control room</span><h2>Race settings</h2></div>
+        <button class="icon-button" id="closeDrawer" aria-label="Close settings">×</button>
+      </div>
+      <label class="field">
+        <span>TikFinity webhook URL</span>
+        <div class="input-row webhook-row"><input id="webhookUrl" readonly /><button id="copyWebhook">Copy</button></div>
+      </label>
+      <p class="hint">Create a TikFinity action, enable <b>Trigger Webhook</b>, and paste this full URL. Set the action to run on every gift.</p>
+      <div class="setup-code" id="webhookTemplate"></div>
+      <div class="divider"><span>GIFT MAPPINGS</span></div>
+      <div id="mappingEditor" class="mapping-editor"></div>
+      <p class="hint">Gift names must match TikTok exactly. Changes save automatically in this browser.</p>
+      <div class="divider"><span>TEST MODE</span></div>
+      <p class="hint">Tap any gift card in the bottom dock to simulate it.</p>
+    </aside>
+    <div class="scrim" id="scrim"></div>
+    <div class="toast-stack" id="toastStack"></div>
+
+    <script type="module" src="/app.js"></script>
+  </body>
+</html>

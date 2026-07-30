@@ -1,0 +1,77 @@
+import express from "express";
+import { createServer } from "node:http";
+import { Server } from "socket.io";
+
+const app = express();
+const httpServer = createServer(app);
+const io = new Server(httpServer);
+const port = Number(process.env.PORT || 3000);
+
+app.use((req, res, next) => {
+  const origin = req.headers.origin || "";
+  if (/^https:\/\/([a-z0-9-]+\.)?(tikfinity\.com|tikfinity\.zerody\.one)$/i.test(origin)) {
+    res.setHeader("Access-Control-Allow-Origin", origin);
+    res.setHeader("Vary", "Origin");
+  }
+  res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+  res.setHeader("Access-Control-Allow-Private-Network", "true");
+  if (req.method === "OPTIONS") return res.sendStatus(204);
+  next();
+});
+
+app.use(express.static("public"));
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+let lastGiftAt = 0;
+
+io.on("connection", (socket) => {
+  socket.emit("connection-status", {
+    state: lastGiftAt && Date.now() - lastGiftAt < 120000 ? "connected" : "demo",
+    message: lastGiftAt && Date.now() - lastGiftAt < 120000
+      ? "TikFinity connected — gift received"
+      : "TikFinity bridge ready",
+    username: ""
+  });
+});
+
+function readValue(source, ...keys) {
+  const entries = Object.entries(source || {});
+  for (const key of keys) {
+    const match = entries.find(([candidate]) =>
+      candidate.toLowerCase() === key.toLowerCase()
+    );
+    if (match && match[1] !== undefined && match[1] !== "") return match[1];
+  }
+  return undefined;
+}
+
+function receiveGift(req, res) {
+  const raw = { ...(req.query || {}), ...(req.body?.data || {}), ...(req.body || {}) };
+  const gift = {
+    id: String(readValue(raw, "giftId", "id") || ""),
+    name: String(readValue(raw, "giftName", "giftname", "name") || "Unknown gift"),
+    count: Math.max(1, Number(readValue(raw, "repeatCount", "repeatcount", "count") || 1)),
+    coins: Math.max(0, Number(readValue(raw, "coins", "diamondCount") || 0)),
+    sender: String(readValue(raw, "username", "sender", "uniqueId", "nickname") || "viewer"),
+    avatar: String(readValue(raw, "avatar", "profilePictureUrl") || "")
+  };
+  lastGiftAt = Date.now();
+  io.emit("gift", gift);
+  io.emit("connection-status", {
+    state: "connected",
+    message: `TikFinity gift received: ${gift.name}`,
+    username: gift.sender
+  });
+  res.json({ ok: true, gift });
+}
+
+app.get("/api/tikfinity/gift", receiveGift);
+app.post("/api/tikfinity/gift", receiveGift);
+app.get("/api/gift", receiveGift);
+app.post("/api/gift", receiveGift);
+
+httpServer.listen(port, () => {
+  console.log(`Gift Race ready at http://localhost:${port}`);
+});

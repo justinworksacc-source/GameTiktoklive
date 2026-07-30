@@ -1,0 +1,23 @@
+{
+  "name": "tiktok-live-gift-race",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "next dev",
+    "build": "next build",
+    "build:worker": "opennextjs-cloudflare build"
+  },
+  "dependencies": {
+    "express": "^5.1.0",
+    "next": "^15.4.4",
+    "react": "^19.1.1",
+    "react-dom": "^19.1.1",
+    "socket.io": "^4.8.1"
+  },
+  "devDependencies": {
+    "@opennextjs/cloudflare": "^1.6.5",
+    "wrangler": "^4.27.0"
+  }
+}
