@@ -1,4 +1,6 @@
 const TARGET_SCORE = 50;
+const COMMENT_BOOST = 1;
+const GIFT_BOOST = 10;
 const DEFAULT_TEAMS = [
   { id: "girls", name: "Girls", gift: "Rose", giftEmoji: "🌹", color: "#ff3b9d" },
   { id: "boys", name: "Boys", gift: "GG", giftEmoji: "🟦", color: "#168cff" }
@@ -47,22 +49,22 @@ function renderMappings() {
     <div class="mapping-row"><span class="map-racer" style="background:#168cff22;color:#168cff">B</span><label><span>B COMMENT</span><input value="Joins Team Boys" readonly></label></div>`;
 }
 
-function showToast(team, gift) {
+function showToast(team, event) {
   const toast = document.createElement("div");
   toast.className = "gift-toast";
-  const detail = gift.isComment
-    ? `Commented ${team.id === "girls" ? "G" : "B"} · team selected`
-    : `${escapeHtml(gift.name || "Gift")} · +${gift.count || 1} point`;
-  toast.innerHTML = `<span>${team.giftEmoji}</span><div><strong>@${escapeHtml(gift.sender || "demo_viewer")} ${gift.isComment ? "joined" : "boosted"} Team ${team.name}</strong><small>${detail}</small></div>`;
+  const detail = event.isComment
+    ? `Commented ${team.id === "girls" ? "G" : "B"} · +${COMMENT_BOOST}`
+    : `${escapeHtml(event.name || "Gift")} · BIG BOOST +${event.points}`;
+  toast.innerHTML = `<span>${team.giftEmoji}</span><div><strong>@${escapeHtml(event.sender || "demo_viewer")} ${event.isComment ? "joined" : "boosted"} Team ${team.name}</strong><small>${detail}</small></div>`;
   els.toastStack.prepend(toast);
   setTimeout(() => toast.remove(), 3500);
 }
 
-function addScore(team, gift = {}) {
+function addScore(team, points, event = {}) {
   if (locked) return;
-  const count = Math.max(1, Number(gift.count || 1));
-  team.score = Math.min(TARGET_SCORE, team.score + count);
-  showToast(team, { name: team.gift, sender: "demo_viewer", ...gift, count });
+  const boost = Math.max(1, Number(points || 1));
+  team.score = Math.min(TARGET_SCORE, team.score + boost);
+  showToast(team, { sender: "demo_viewer", ...event, points: boost });
   render();
   if (team.score >= TARGET_SCORE) showWinner(team);
 }
@@ -72,13 +74,14 @@ function chooseTeam(sender, teamId, announce = true) {
   if (!team || !sender) return;
   viewerTeams.set(sender.toLowerCase(), team.id);
   localStorage.setItem("battle-viewer-teams", JSON.stringify([...viewerTeams]));
-  if (announce) showToast(team, { sender, isComment: true });
+  if (announce) addScore(team, COMMENT_BOOST, { sender, isComment: true });
 }
 
 function handleGift(gift) {
   const teamId = viewerTeams.get(String(gift.sender || "").toLowerCase());
   const team = teams.find((item) => item.id === teamId);
-  if (team) addScore(team, gift);
+  const count = Math.max(1, Number(gift.count || 1));
+  if (team) addScore(team, GIFT_BOOST * count, gift);
 }
 
 function handleEvent(event) {
@@ -116,7 +119,6 @@ function openDrawer(open) {
 document.querySelectorAll(".gift-button").forEach((button) => {
   button.addEventListener("click", () => {
     chooseTeam("demo_viewer", button.dataset.team);
-    setTimeout(() => handleGift({ sender: "demo_viewer", name: "Test gift", count: 1 }), 250);
   });
 });
 $("#resetButton").addEventListener("click", () => resetRound(false));
