@@ -5,9 +5,7 @@ const CACHE_URL = "https://gift-dash.internal/latest-event";
 function readValue(source, ...keys) {
   const entries = Object.entries(source || {});
   for (const key of keys) {
-    const match = entries.find(([candidate]) =>
-      candidate.toLowerCase() === key.toLowerCase()
-    );
+    const match = entries.find(([candidate]) => candidate.toLowerCase() === key.toLowerCase());
     if (match && match[1] !== undefined && match[1] !== "") return match[1];
   }
 }
@@ -28,36 +26,29 @@ async function parseRequest(request) {
   return { ...query, ...(body?.data || {}), ...body };
 }
 
-async function saveGift(gift) {
-  globalThis.__giftDashLatest = gift;
+async function receive(request) {
+  const raw = await parseRequest(request);
+  const text = String(readValue(raw, "comment", "commentText", "commandParams", "message", "text") || "").trim();
+  const choice = text.toLowerCase();
+  const event = {
+    type: "comment",
+    eventId: crypto.randomUUID(),
+    receivedAt: Date.now(),
+    sender: String(readValue(raw, "username", "sender", "uniqueId", "nickname") || "viewer"),
+    comment: text,
+    team: choice === "g" ? "girls" : choice === "b" ? "boys" : ""
+  };
+
   if (globalThis.caches?.default) {
     await globalThis.caches.default.put(
       new Request(CACHE_URL),
-      new Response(JSON.stringify(gift), {
-        headers: {
-          "Content-Type": "application/json",
-          "Cache-Control": "public, max-age=86400"
-        }
+      new Response(JSON.stringify(event), {
+        headers: { "Content-Type": "application/json", "Cache-Control": "public, max-age=86400" }
       })
     );
   }
-}
-
-async function receive(request) {
-  const raw = await parseRequest(request);
-  const gift = {
-    type: "gift",
-    eventId: crypto.randomUUID(),
-    receivedAt: Date.now(),
-    id: String(readValue(raw, "giftId", "id") || ""),
-    name: String(readValue(raw, "giftName", "giftname", "name") || "Unknown gift"),
-    count: Math.max(1, Number(readValue(raw, "repeatCount", "repeatcount", "count") || 1)),
-    coins: Math.max(0, Number(readValue(raw, "coins", "diamondCount") || 0)),
-    sender: String(readValue(raw, "username", "sender", "uniqueId", "nickname") || "viewer"),
-    avatar: String(readValue(raw, "avatar", "profilePictureUrl") || "")
-  };
-  await saveGift(gift);
-  return Response.json({ ok: true, gift });
+  globalThis.__giftDashLatest = event;
+  return Response.json({ ok: true, event, accepted: Boolean(event.team) });
 }
 
 export const GET = receive;

@@ -3,79 +3,100 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="theme-color" content="#050813" />
-    <title>Gift Dash — TikTok LIVE Race</title>
+    <meta name="theme-color" content="#070918" />
+    <title>Boys vs Girls — LIVE Battle</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@500;600;700&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/styles.css" />
   </head>
   <body>
-    <main class="app-shell">
+    <main class="battle-app">
       <header class="topbar">
-        <div class="brand">
-          <div class="brand-mark">⚡</div>
-          <div>
-            <span class="eyebrow">TikTok LIVE interactive</span>
-            <h1>Gift Dash</h1>
-          </div>
-        </div>
-        <div class="status-wrap">
-          <span class="status-dot" id="statusDot"></span>
-          <span id="statusText">Demo mode</span>
-        </div>
-        <button class="icon-button" id="settingsButton" aria-label="Open settings">⚙</button>
+        <a class="brand" href="#" aria-label="Boys vs Girls home">
+          <span class="brand-mark">⚡</span>
+          <span><small>LIVE GIFT BATTLE</small><b>BOYS <i>VS</i> GIRLS</b></span>
+        </a>
+        <div class="connection"><i id="statusDot"></i><span id="statusText">Demo mode</span></div>
+        <button class="settings-button" id="settingsButton" aria-label="Open settings">⚙</button>
       </header>
 
-      <section class="leader-strip" id="leaderStrip" aria-label="Top racers"></section>
+      <section class="battle-stage" id="battleStage">
+        <img src="/assets/boys-vs-girls-arena.png" alt="" class="arena-art" />
+        <div class="stage-shade"></div>
 
-      <section class="race-card">
-        <div class="race-heading">
-          <div>
-            <span class="live-pill"><i></i> LIVE RACE</span>
-            <h2>First to the portal wins</h2>
-          </div>
-          <div class="winner-burst" id="winnerBurst"></div>
-          <div class="round-info"><span>ROUND</span><strong id="roundNumber">01</strong></div>
+        <div class="score-card girls-score">
+          <span class="score-number" id="girlsScore">0</span>
+          <span class="team-name">🌸 GIRLS</span>
+          <span class="score-detail" id="girlsDetail">0 / 50 gifts</span>
         </div>
-        <div class="track" id="track">
-          <div class="track-grid"></div>
-          <div class="start-line"><span>START</span></div>
-          <div class="finish-line"><span>FINISH</span></div>
-          <div class="lanes" id="lanes"></div>
+        <div class="live-badge"><i></i> LIVE</div>
+        <div class="score-card boys-score">
+          <span class="team-name">BOYS ⚡</span>
+          <span class="score-number" id="boysScore">0</span>
+          <span class="score-detail" id="boysDetail">0 / 50 gifts</span>
+        </div>
+
+        <div class="versus-badge"><span>BOYS</span><b>VS</b><span>GIRLS</span></div>
+        <div class="team-callout girls-callout"><b>TEAM G</b><small>Send a Rose 🌹</small></div>
+        <div class="team-callout boys-callout"><b>TEAM B</b><small>Send a GG 🟦</small></div>
+
+        <div class="progress-shell">
+          <div class="progress-girls" id="girlsBar"></div>
+          <div class="progress-center">VS</div>
+          <div class="progress-boys" id="boysBar"></div>
+        </div>
+
+        <div class="winner-overlay" id="winnerOverlay">
+          <span>ROUND WINNER</span>
+          <strong id="winnerName">GIRLS!</strong>
+          <button id="nextRound">Play next round</button>
         </div>
       </section>
 
-      <footer class="gift-dock">
-        <div class="dock-title">
-          <span>GIFT BOOSTS</span>
-          <small>Send a gift to move its racer</small>
+      <section class="gift-panel">
+        <div class="round-copy">
+          <small>ROUND <span id="roundNumber">01</span></small>
+          <strong>CHOOSE YOUR TEAM</strong>
+          <span>Comment B or G, then send gifts to boost</span>
         </div>
-        <div class="gift-list" id="giftList"></div>
-        <button class="reset-button" id="resetButton">↻ Reset race</button>
-      </footer>
+        <button class="gift-button girls-gift" data-team="girls">
+          <span class="gift-icon">🌹</span>
+          <span><small>JOIN TEAM GIRLS</small><b>Comment G</b></span>
+          <em>G</em>
+        </button>
+        <button class="gift-button boys-gift" data-team="boys">
+          <span class="gift-icon">🟦</span>
+          <span><small>JOIN TEAM BOYS</small><b>Comment B</b></span>
+          <em>B</em>
+        </button>
+        <button class="reset-button" id="resetButton" aria-label="Reset scores">↻</button>
+      </section>
     </main>
 
     <aside class="drawer" id="drawer" aria-hidden="true">
       <div class="drawer-head">
-        <div><span class="eyebrow">Control room</span><h2>Race settings</h2></div>
-        <button class="icon-button" id="closeDrawer" aria-label="Close settings">×</button>
+        <div><small>CONTROL ROOM</small><h2>Battle settings</h2></div>
+        <button id="closeDrawer" aria-label="Close settings">×</button>
       </div>
       <label class="field">
-        <span>TikFinity webhook URL</span>
-        <div class="input-row webhook-row"><input id="webhookUrl" readonly /><button id="copyWebhook">Copy</button></div>
+        <span>TikFinity gift webhook URL</span>
+        <div class="input-row"><input id="webhookUrl" readonly><button id="copyWebhook">Copy</button></div>
       </label>
-      <p class="hint">Create a TikFinity action, enable <b>Trigger Webhook</b>, and paste this full URL. Set the action to run on every gift.</p>
+      <label class="field comment-field">
+        <span>TikFinity comment webhook URL</span>
+        <div class="input-row"><input id="commentWebhookUrl" readonly><button id="copyCommentWebhook">Copy</button></div>
+      </label>
+      <p>Create one TikFinity action for comments and one for gifts. A viewer comments B or G once; their later gifts boost that team.</p>
       <div class="setup-code" id="webhookTemplate"></div>
-      <div class="divider"><span>GIFT MAPPINGS</span></div>
-      <div id="mappingEditor" class="mapping-editor"></div>
-      <p class="hint">Gift names must match TikTok exactly. Changes save automatically in this browser.</p>
-      <div class="divider"><span>TEST MODE</span></div>
-      <p class="hint">Tap any gift card in the bottom dock to simulate it.</p>
+      <h3>LIVE RULE</h3>
+      <div id="mappingEditor"></div>
+      <p>All gift types count. Repeat gifts add their final repeat quantity.</p>
     </aside>
     <div class="scrim" id="scrim"></div>
     <div class="toast-stack" id="toastStack"></div>
 
+    <script src="/socket.io/socket.io.js"></script>
     <script type="module" src="/app.js"></script>
   </body>
 </html>
